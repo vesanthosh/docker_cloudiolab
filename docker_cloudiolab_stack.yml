@@ -37,13 +37,15 @@ services:
     networks:
       - cloudiolab_common_network
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         failure_action: rollback
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
+      placement:
+        constraints: [node.hostname == jarvis]
 
   background:
     image: opensuse/portus:head
@@ -74,13 +76,15 @@ services:
     networks:
       - cloudiolab_common_network
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         failure_action: rollback
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
+      placement:
+        constraints: [node.hostname == jarvis]
 
   db:
     image: library/mariadb:10.0.23
@@ -165,13 +169,15 @@ services:
     networks:
       - cloudiolab_common_network
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         failure_action: rollback
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
+      placement:
+        constraints: [node.hostname == jarvis]
 
   postgres:
     image: postgres:10-alpine
