@@ -4,97 +4,83 @@ services:
     image: opensuse/portus:head
     environment:
       - CCONFIG_PREFIX=PORTUS
-      - PORTUS_MACHINE_FQDN_VALUE=/run/secrets/machine_fqdn
+      - PORTUS_MACHINE_FQDN_VALUE=docker.cloudiolab.com
       - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
 
-      # DB. The password for the database should definitely not be here. You are
-      # probably better off with Docker Swarm secrets.
       - PORTUS_DB_HOST=db
       - PORTUS_DB_DATABASE=portus_production
-      - PORTUS_DB_PASSWORD=/run/secrets/database_password
+      - PORTUS_DB_PASSWORD=/run/secrets/docker_portus_database_password
       - PORTUS_DB_POOL=5
 
-      # Secrets. It can possibly be handled better with Swarm's secrets.
-      - PORTUS_SECRET_KEY_BASE=/run/secrets/secret_key_base
-      - PORTUS_KEY_PATH=/certificates/privkey.pem
-      - PORTUS_PASSWORD=/run/secrets/portus_password
+      - PORTUS_SECRET_KEY_BASE=/run/secrets/docker_portus_secret_key_base
+      - PORTUS_KEY_PATH=/run/secrets/docker.cloudiolab.com.14072019.privkey.pem
+      - PORTUS_PASSWORD=/run/secrets/docker_portus_password
 
-      # SSL
-      - PORTUS_PUMA_TLS_KEY=/certificates/privkey.pem
-      - PORTUS_PUMA_TLS_CERT=/certificates/fullchain.pem
+      - PORTUS_PUMA_TLS_KEY=/run/secrets/docker.cloudiolab.com.14072019.privkey.pem
+      - PORTUS_PUMA_TLS_CERT=/run/secrets/docker.cloudiolab.com.14072019.fullchain.pem
 
       # NGinx is serving the assets instead of Puma. If you want to change this,
       # uncomment this line.
       #- RAILS_SERVE_STATIC_FILES='true'
     secrets:
-      - machine_fqdn
-      - database_password
-      - secret_key_base
-      - portus_password
+      - docker_portus_database_password
+      - docker_portus_secret_key_base
+      - docker_portus_password
+      - docker.cloudiolab.com.14072019.fullchain.pem
+      - docker.cloudiolab.com.14072019.privkey.pem
     ports:
       - 3000:3000
     depends_on:
       - db
     volumes:
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/fullchain.pem:/certificates/fullchain.pem
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/privkey.pem:/certificates/privkey.pem
       - portus_static:/srv/Portus/public
     networks:
-      - common_network
+      - cloudiolab_common_network
     deploy:
-      replicas: 1
+      replicas: 2
       update_config:
         failure_action: rollback
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
-      placement:
-        constraints: [node.hostname == wNode1]
 
   background:
     image: opensuse/portus:head
-    depends_on:
-      - portus
-      - db
     environment:
-      # Theoretically not needed, but cconfig's been buggy on this...
       - CCONFIG_PREFIX=PORTUS
-      - PORTUS_MACHINE_FQDN_VALUE=/run/secrets/machine_fqdn
+      - PORTUS_MACHINE_FQDN_VALUE=docker.cloudiolab.com
       - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
 
-      # DB. The password for the database should definitely not be here. You are
-      # probably better off with Docker Swarm secrets.
       - PORTUS_DB_HOST=db
       - PORTUS_DB_DATABASE=portus_production
-      - PORTUS_DB_PASSWORD=/run/secrets/database_password
+      - PORTUS_DB_PASSWORD=/run/secrets/docker_portus_database_password
       - PORTUS_DB_POOL=5
 
-      # Secrets. It can possibly be handled better with Swarm's secrets.
-      - PORTUS_SECRET_KEY_BASE=/run/secrets/secret_key_base
-      - PORTUS_KEY_PATH=/certificates/privkey.pem
-      - PORTUS_PASSWORD=/run/secrets/portus_password
+      - PORTUS_SECRET_KEY_BASE=/run/secrets/docker_portus_secret_key_base
+      - PORTUS_KEY_PATH=/run/secrets/docker.cloudiolab.com.14072019.privkey.pem
+      - PORTUS_PASSWORD=/run/secrets/docker_portus_password
 
       - PORTUS_BACKGROUND=true
     secrets:
-      - machine_fqdn
-      - database_password
-      - secret_key_base
-      - portus_password
-    volumes:
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/privkey.pem:/certificates/privkey.pem
+      - docker_portus_database_password
+      - docker_portus_secret_key_base
+      - docker_portus_password
+      - docker.cloudiolab.com.14072019.fullchain.pem
+      - docker.cloudiolab.com.14072019.privkey.pem
+    depends_on:
+      - portus
+      - db
     networks:
-      - common_network
+      - cloudiolab_common_network
     deploy:
-      replicas: 1
+      replicas: 2
       update_config:
         failure_action: rollback
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
-      placement:
-        constraints: [node.hostname == wNode1]      
 
   db:
     image: library/mariadb:10.0.23
@@ -102,14 +88,13 @@ services:
     environment:
       - MYSQL_DATABASE=portus_production
 
-      # Again, the password shouldn't be handled like this.
-      - MYSQL_ROOT_PASSWORD=/run/secrets/database_password
+      - MYSQL_ROOT_PASSWORD=/run/secrets/docker_portus_database_password
     secrets:
-      - database_password
+      - docker_portus_database_password
     volumes:
       - mariadb:/var/lib/mysql
     networks:
-      - common_network
+      - cloudiolab_common_network
     deploy:
       replicas: 1
       update_config:
@@ -119,23 +104,20 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == wNode1]
+        constraints: [node.hostname == jarvis]
 
   registry:
     image: library/registry:2.7
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
-      # Authentication
       REGISTRY_AUTH_TOKEN_REALM: https://docker.cloudiolab.com/v2/token
-      REGISTRY_AUTH_TOKEN_SERVICE: /run/secrets/machine_fqdn
-      REGISTRY_AUTH_TOKEN_ISSUER: /run/secrets/machine_fqdn
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certificates/fullchain.pem
+      REGISTRY_AUTH_TOKEN_SERVICE: docker.cloudiolab.com
+      REGISTRY_AUTH_TOKEN_ISSUER: docker.cloudiolab.com
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/docker.cloudiolab.com.14072019.fullchain.pem
 
-      # SSL
-      REGISTRY_HTTP_TLS_CERTIFICATE: /certificates/fullchain.pem
-      REGISTRY_HTTP_TLS_KEY: /certificates/privkey.pem
+      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/docker.cloudiolab.com.14072019.fullchain.pem
+      REGISTRY_HTTP_TLS_KEY: /run/secrets/docker.cloudiolab.com.14072019.privkey.pem
 
-      # Portus endpoint
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
           url: https://docker.cloudiolab.com/v2/webhooks/events
@@ -143,18 +125,20 @@ services:
           threshold: 5
           backoff: 1s
     secrets:
-      - machine_fqdn
+      - docker.cloudiolab.com.14072019.fullchain.pem
+      - docker.cloudiolab.com.14072019.privkey.pem
     volumes:
-      - /docker_volumes/portus/registry:/var/lib/registry
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/fullchain.pem:/certificates/fullchain.pem
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/privkey.pem:/certificates/privkey.pem
-      - ./registry/config.yml:/etc/docker/registry/config.yml:ro
-      - ./registry/init:/etc/docker/registry/init:ro
+      - docker_volume:/var/lib/registry
+    configs:
+      - source: docker_config-15071227
+        target: /etc/docker/registry/config.yml
+      - source: docker_init-15071227
+        target: /etc/docker/registry/init
     networks:
-      - common_network
+      - cloudiolab_common_network
     ports:
       - 5000:5000
-      - 5001:5001 # required to access debug service
+      - 5001:5001
     deploy:
       replicas: 1
       update_config:
@@ -164,31 +148,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == wNode1]
-
-  nginx:
-    image: vesanthosh/reverse_proxy:latest
-    volumes:
-      - /root/page_for_letsencrypt:/usr/share/nginx/html
-      - /docker_volumes/dhparam:/etc/ssl/certs/dhparam
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/fullchain.pem:/etc/letsencrypt/live/docker.cloudiolab.com/fullchain.pem
-      - /docker_volumes/letsencrypt/etc/letsencrypt/live/docker.cloudiolab.com/privkey.pem:/etc/letsencrypt/live/docker.cloudiolab.com/privkey.pem
-      - portus_static:/srv/Portus/public:ro
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - common_network
-    deploy:
-      replicas: 1
-      update_config:
-        failure_action: rollback
-        parallelism: 1
-        delay: 10s
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [node.hostname == wNode1]
+        constraints: [node.hostname == jarvis]
 
   clair:
     image: quay.io/coreos/clair:v2.0.8
@@ -197,28 +157,30 @@ services:
     ports:
       - "6060-6061:6060-6061"
     volumes:
-      - clair:/tmp
-      - ./clair:/config
+      - clair_tmp:/tmp
+    configs:
+      - source: clair_docker-15071227
+        target: /config/config.yaml
     command: [-config, /config/config.yaml]
     networks:
-      - common_network
+      - cloudiolab_common_network
     deploy:
-      replicas: 1
+      replicas: 2
       update_config:
         failure_action: rollback
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
-      placement:
-        constraints: [node.hostname == wNode1]
 
   postgres:
     image: postgres:10-alpine
     environment:
       POSTGRES_PASSWORD: psqlpassword
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
     networks:
-      - common_network
+      - cloudiolab_common_network
     deploy:
       replicas: 1
       update_config:
@@ -228,25 +190,40 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == wNode1]
+        constraints: [node.hostname == jarvis]
 
 volumes:
   portus_static:
     driver: local
   mariadb:
     driver: local
-  clair:
+  postgresdb:
+    driver: local
+  docker_volume:
+    driver: local
+  clair_tmp:
     driver: local
 
 networks:
-  common_network:
+  cloudiolab_common_network:
+    external: true
 
 secrets:
-  database_password:
+  docker.cloudiolab.com.14072019.fullchain.pem:
     external: true
-  machine_fqdn:
+  docker.cloudiolab.com.14072019.privkey.pem:
     external: true
-  portus_password:
+  docker_portus_database_password:
     external: true
-  secret_key_base:
+  docker_portus_secret_key_base:
     external: true
+  docker_portus_password:
+    external: true
+
+configs:
+  clair_docker-15071227:
+    file: ./clair/config.yaml
+  docker_config-15071227:
+    file: ./registry/config.yml
+  docker_init-15071227:
+    file: ./registry/init
