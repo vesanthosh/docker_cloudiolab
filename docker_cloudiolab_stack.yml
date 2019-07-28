@@ -45,7 +45,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == jarvis]
+        constraints: [node.hostname == cloudiolab-jarvis]
 
   background:
     image: opensuse/portus:head
@@ -84,7 +84,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == jarvis]
+        constraints: [node.hostname == cloudiolab-jarvis]
 
   db:
     image: library/mariadb:10.0.23
@@ -108,7 +108,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == jarvis]
+        constraints: [node.hostname == cloudiolab-jarvis]
 
   registry:
     image: library/registry:2.7
@@ -152,7 +152,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == jarvis]
+        constraints: [node.hostname == cloudiolab-jarvis]
 
   clair:
     image: quay.io/coreos/clair:v2.0.8
@@ -177,7 +177,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == jarvis]
+        constraints: [node.hostname == cloudiolab-jarvis]
 
   postgres:
     image: postgres:10-alpine
@@ -196,7 +196,7 @@ services:
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == jarvis]
+        constraints: [node.hostname == cloudiolab-jarvis]
 
 volumes:
   portus_static:
