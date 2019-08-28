@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   portus:
     image: opensuse/portus:head
@@ -40,12 +40,12 @@ services:
       replicas: 1
       update_config:
         failure_action: rollback
-        parallelism: 1
+        parallelism: 2
         delay: 10s
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == cloudiolab-jarvis]
+        constraints: [node.hostname == jarvis]
 
   background:
     image: opensuse/portus:head
@@ -79,12 +79,12 @@ services:
       replicas: 1
       update_config:
         failure_action: rollback
-        parallelism: 1
+        parallelism: 2
         delay: 10s
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == cloudiolab-jarvis]
+        constraints: [node.hostname == jarvis]
 
   db:
     image: library/mariadb:10.0.23
@@ -103,12 +103,12 @@ services:
       replicas: 1
       update_config:
         failure_action: rollback
-        parallelism: 1
+        parallelism: 2
         delay: 10s
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == cloudiolab-jarvis]
+        constraints: [node.hostname == jarvis]
 
   registry:
     image: library/registry:2.7
@@ -147,12 +147,12 @@ services:
       replicas: 1
       update_config:
         failure_action: rollback
-        parallelism: 1
+        parallelism: 2
         delay: 10s
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == cloudiolab-jarvis]
+        constraints: [node.hostname == jarvis]
 
   clair:
     image: quay.io/coreos/clair:v2.0.8
@@ -172,12 +172,12 @@ services:
       replicas: 1
       update_config:
         failure_action: rollback
-        parallelism: 1
+        parallelism: 2
         delay: 10s
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == cloudiolab-jarvis]
+        constraints: [node.hostname == jarvis]
 
   postgres:
     image: postgres:10-alpine
@@ -191,12 +191,12 @@ services:
       replicas: 1
       update_config:
         failure_action: rollback
-        parallelism: 1
+        parallelism: 2
         delay: 10s
       restart_policy:
         condition: on-failure
       placement:
-        constraints: [node.hostname == cloudiolab-jarvis]
+        constraints: [node.hostname == jarvis]
 
 volumes:
   portus_static:
