@@ -13,11 +13,11 @@ services:
       - PORTUS_DB_POOL=5
 
       - PORTUS_SECRET_KEY_BASE=/run/secrets/docker_portus_secret_key_base
-      - PORTUS_KEY_PATH=/run/secrets/docker.cloudiolab.com.14072019.privkey.pem
+      - PORTUS_KEY_PATH=/run/secrets/docker.cloudiolab.com.01092019.privkey.pem
       - PORTUS_PASSWORD=/run/secrets/docker_portus_password
 
-      - PORTUS_PUMA_TLS_KEY=/run/secrets/docker.cloudiolab.com.14072019.privkey.pem
-      - PORTUS_PUMA_TLS_CERT=/run/secrets/docker.cloudiolab.com.14072019.fullchain.pem
+      - PORTUS_PUMA_TLS_KEY=/run/secrets/docker.cloudiolab.com.01092019.privkey.pem
+      - PORTUS_PUMA_TLS_CERT=/run/secrets/docker.cloudiolab.com.01092019.fullchain.pem
 
       # NGinx is serving the assets instead of Puma. If you want to change this,
       # uncomment this line.
@@ -26,8 +26,8 @@ services:
       - docker_portus_database_password
       - docker_portus_secret_key_base
       - docker_portus_password
-      - docker.cloudiolab.com.14072019.fullchain.pem
-      - docker.cloudiolab.com.14072019.privkey.pem
+      - docker.cloudiolab.com.01092019.fullchain.pem
+      - docker.cloudiolab.com.01092019.privkey.pem
     ports:
       - 3000:3000
     depends_on:
@@ -60,7 +60,7 @@ services:
       - PORTUS_DB_POOL=5
 
       - PORTUS_SECRET_KEY_BASE=/run/secrets/docker_portus_secret_key_base
-      - PORTUS_KEY_PATH=/run/secrets/docker.cloudiolab.com.14072019.privkey.pem
+      - PORTUS_KEY_PATH=/run/secrets/docker.cloudiolab.com.01092019.privkey.pem
       - PORTUS_PASSWORD=/run/secrets/docker_portus_password
 
       - PORTUS_BACKGROUND=true
@@ -68,8 +68,8 @@ services:
       - docker_portus_database_password
       - docker_portus_secret_key_base
       - docker_portus_password
-      - docker.cloudiolab.com.14072019.fullchain.pem
-      - docker.cloudiolab.com.14072019.privkey.pem
+      - docker.cloudiolab.com.01092019.fullchain.pem
+      - docker.cloudiolab.com.01092019.privkey.pem
     depends_on:
       - portus
       - db
@@ -117,10 +117,10 @@ services:
       REGISTRY_AUTH_TOKEN_REALM: https://docker.cloudiolab.com/v2/token
       REGISTRY_AUTH_TOKEN_SERVICE: docker.cloudiolab.com
       REGISTRY_AUTH_TOKEN_ISSUER: docker.cloudiolab.com
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/docker.cloudiolab.com.14072019.fullchain.pem
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/docker.cloudiolab.com.01092019.fullchain.pem
 
-      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/docker.cloudiolab.com.14072019.fullchain.pem
-      REGISTRY_HTTP_TLS_KEY: /run/secrets/docker.cloudiolab.com.14072019.privkey.pem
+      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/docker.cloudiolab.com.01092019.fullchain.pem
+      REGISTRY_HTTP_TLS_KEY: /run/secrets/docker.cloudiolab.com.01092019.privkey.pem
 
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
@@ -129,8 +129,8 @@ services:
           threshold: 5
           backoff: 1s
     secrets:
-      - docker.cloudiolab.com.14072019.fullchain.pem
-      - docker.cloudiolab.com.14072019.privkey.pem
+      - docker.cloudiolab.com.01092019.fullchain.pem
+      - docker.cloudiolab.com.01092019.privkey.pem
     volumes:
       - docker_volume:/var/lib/registry
     configs:
@@ -215,9 +215,9 @@ networks:
     external: true
 
 secrets:
-  docker.cloudiolab.com.14072019.fullchain.pem:
+  docker.cloudiolab.com.01092019.fullchain.pem:
     external: true
-  docker.cloudiolab.com.14072019.privkey.pem:
+  docker.cloudiolab.com.01092019.privkey.pem:
     external: true
   docker_portus_database_password:
     external: true
