@@ -2,6 +2,6 @@
 
 set -x
 
-cp /run/secrets/docker.cloudiolab.com.14072019.fullchain.pem /usr/local/share/ca-certificates
+cp /run/secrets/docker.cloudiolab.com.30112019.fullchain.pem /usr/local/share/ca-certificates
 update-ca-certificates
 registry serve /etc/docker/registry/config.yml
